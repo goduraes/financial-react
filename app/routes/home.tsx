@@ -1,12 +1,11 @@
-import type { Route } from "./+types/home";
+import AppBreadcrumb from "~/components/app-breadcrumb";
 
-export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
-  ];
+const Home = () => {
+  return (
+    <div className="flex flex-col gap-4">
+      <AppBreadcrumb data={[{ text: 'Home' }]} />
+    </div>
+  );
 }
 
-export default function Home() {
-  return 'home';
-}
+export default Home;

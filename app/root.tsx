@@ -4,11 +4,17 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useNavigate,
 } from "react-router";
+import { useEffect } from "react";
+import { Toaster } from "~/components/ui/sonner"
+import { setNavigate } from "./services/navigation";
 
 import "./app.css";
+import { TooltipProvider } from "~/components/ui/tooltip";
+import { UserProvider } from "./contexts/userProvider";
 
-export function Layout({ children }: { children: React.ReactNode }) {
+const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang="en" className="dark">
       <head>
@@ -26,6 +32,22 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function App() {
-  return <Outlet />;
+const App = () => {
+  const nav = useNavigate();
+
+  useEffect(() => {
+    setNavigate(nav);
+  }, [nav]);
+  
+  return (
+    <UserProvider>
+      <TooltipProvider>
+        <Outlet />
+        <Toaster position="top-center" />
+      </TooltipProvider>
+    </UserProvider>
+  );
 }
+
+export { Layout };
+export default App;
