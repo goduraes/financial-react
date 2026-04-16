@@ -7,16 +7,30 @@ import {
 import {
   Home,
   Settings,
-  Users
+  Users,
+  Wallet,
+  ArrowLeftRight,
+  Tags
 } from "lucide-react"
 import NavUser from "./nav-user"
 import NavMain from "./nav-main"
+import { Link } from "react-router";
 
 const data = [
   {
     title: "Home",
     url: "/",
     icon: Home,
+  },
+  {
+    title: "Transações",
+    url: "/transations",
+    icon: ArrowLeftRight,
+  },
+  {
+    title: "Tags",
+    url: "/tags",
+    icon: Tags,
   },
   {
     title: "Admin",
@@ -35,7 +49,11 @@ const data = [
 const AppSidebar = () => {
   return (
     <Sidebar variant="floating" collapsible="icon">
-      <SidebarHeader />
+      <SidebarHeader>
+        <div className="flex justify-center">
+          <Link to="/"><Wallet /></Link>
+        </div>
+      </SidebarHeader>
       <SidebarContent>
         <NavMain items={data} />
       </SidebarContent>

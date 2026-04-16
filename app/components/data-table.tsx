@@ -16,6 +16,12 @@ import {
   TableRow,
 } from "~/components/ui/table"
 
+declare module "@tanstack/react-table" {
+  interface ColumnMeta<TData, TValue> {
+    width?: string
+  }
+}
+
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
@@ -39,7 +45,7 @@ export function DataTable<TData, TValue>({
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} style={{ width: header.column.columnDef.meta?.width }}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -61,7 +67,7 @@ export function DataTable<TData, TValue>({
                 data-state={row.getIsSelected() && "selected"}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell key={cell.id} style={{ width: cell.column.columnDef.meta?.width }}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
@@ -70,7 +76,7 @@ export function DataTable<TData, TValue>({
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
+                Nenhum resultado.
               </TableCell>
             </TableRow>
           )}
