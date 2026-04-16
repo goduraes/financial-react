@@ -35,15 +35,15 @@ const ProtectedRoute = () => {
       {user ? <AppSidebar /> : null}
 
       <main className={`h-screen w-full ${!user ? 'hidden' : ''}`}>
-        <div className="stick h-12.5 pr-5 pl-2 w-full flex justify-between items-center">
+        <div className="stick h-12.5 p-3.5 w-full flex justify-between items-center">
           <AppNavbar />
           <span>Finanças Pessoais</span>
           <div></div>
         </div>
         <div className="h-[calc(100%-50px)] overflow-y-auto">
-          <Card className="mr-5 ml-3 mb-2 mt-1 p-4 min-h-[calc(100%-12px)]">
+          <div className="px-4 pb-4 min-h-[calc(100%-12px)]">
             <Outlet />
-          </Card>
+          </div>
         </div>
       </main>
     </SidebarProvider>

@@ -17,6 +17,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  useSidebar,
 } from "~/components/ui/sidebar"
 import { useMe } from "~/hooks/useMe"
 
@@ -38,6 +39,13 @@ const NavMain = ({
 }) => {
   const location = useLocation();
   const { user } = useMe();
+  const { toggleSidebar, open } = useSidebar();
+
+  const changeSideBarState = () => {
+    if (open) return;
+    localStorage.setItem('sidebarOpen', JSON.stringify(true));
+    toggleSidebar();
+};
   
   return (
     <SidebarGroup>
@@ -55,7 +63,7 @@ const NavMain = ({
                 className="group/collapsible"
               >
                 <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
+                  <CollapsibleTrigger asChild onClick={() => changeSideBarState()}>
                     <SidebarMenuButton tooltip={item.title}>
                       {item.icon && <item.icon />}
                       <span>{item.title}</span>
@@ -83,7 +91,7 @@ const NavMain = ({
 
           return (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild isActive={location.pathname === item.url}>
+              <SidebarMenuButton asChild tooltip={item.title} isActive={location.pathname === item.url}>
                 <Link to={item.url || ''} >
                   {item.icon && <item.icon />}
                   <span>{item.title}</span>

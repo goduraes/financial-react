@@ -48,7 +48,7 @@ const data = [
 
 const AppSidebar = () => {
   return (
-    <Sidebar variant="floating" collapsible="icon">
+    <Sidebar variant="inset" collapsible="icon" className="border-r">
       <SidebarHeader>
         <div className="flex justify-center">
           <Link to="/"><Wallet /></Link>

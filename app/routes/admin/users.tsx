@@ -17,16 +17,14 @@ export type User = {
 }
 
 export const columns: ColumnDef<User>[] = [
-    { accessorKey: "id", header: "ID" },
-    { accessorKey: "name", header: "Name" },
-    { accessorKey: "email", header: "E-mail" },
-    { accessorKey: "role", header: "Role" },
+    { accessorKey: "id", header: "ID", meta: { width: "25%" }},
+    { accessorKey: "name", header: "Name", meta: { width: "25%" }},
+    { accessorKey: "email", header: "E-mail", meta: { width: "25%" }},
+    { accessorKey: "role", header: "Role", meta: { width: "25%" }},
     {
         id: "actions",
         header: "Ações",
-        meta: {
-            width: "100px",
-        },
+        meta: { width: "100px" },
         cell: ({ row }) => {
           const item = row.original
           return (
