@@ -53,6 +53,7 @@ const Profile = () => {
             <AppBreadcrumb data={[{ text: 'Perfil' }]} />
             
             <Card size="sm" className="px-4">
+                <h2 className="text-lg font-semibold">Dados Pessoais</h2>
                 <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
                     <div className="grid gap-2">
                         <Label htmlFor="name">Nome</Label>

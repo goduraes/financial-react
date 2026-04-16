@@ -1,6 +1,3 @@
-"use client"
-
-import type { Route } from "./+types/home";
 import { Button } from "~/components/ui/button";
 import { Input  } from "~/components/ui/input";
 import { Label  } from "~/components/ui/label";
@@ -16,8 +13,11 @@ import {
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { useApi } from "../hooks/useApi";
 import { login, setToken } from "../services/auth";
-import { useNavigate } from "react-router";
-import { Loader2 } from "lucide-react";
+import { Link, useNavigate } from "react-router";
+import { Eye, EyeOffIcon, Loader2 } from "lucide-react";
+import { Field, FieldDescription } from "~/components/ui/field";
+import { InputGroup, InputGroupInput, InputGroupAddon } from "~/components/ui/input-group";
+import { useState } from "react";
 
 type Inputs = {
   email: string
@@ -26,9 +26,10 @@ type Inputs = {
 
 const Login = () => {
   const navigate = useNavigate();
-  const { request, loading, error } = useApi();
-  const { register, handleSubmit } = useForm<Inputs>();
-  const onSubmit: SubmitHandler<Inputs> = (data) => handleLogin(data.email, data.password)
+  const { request, loading } = useApi();
+  const { register, handleSubmit, formState: { errors } } = useForm<Inputs>();
+  const onSubmit: SubmitHandler<Inputs> = (data) => handleLogin(data.email, data.password);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async (email: string, password: string) => {
     try {
@@ -42,31 +43,51 @@ const Login = () => {
 
   return (
     <div className="h-screen flex items-center justify-center">
-      <Card className="w-full max-w-sm">
+      <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Faça login na sua conta</CardTitle>
           <CardDescription>
             Insira seu e-mail abaixo para acessar sua conta
           </CardDescription>
           <CardAction>
-            <Button variant="link">Sign Up</Button>
+            <Link to="/register">Sign Up</Link>
           </CardAction>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-            <div className="grid gap-2">
+            <Field className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="m@example.com"
-                {...register("email")}
+                className={errors.email ? 'border-red-500' : ''}
+                {...register("email", { 
+                  required: "E-mail é obrigatório", 
+                  pattern: {
+                    value: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/i,
+                    message: "E-mail inválido"
+                  }
+                })} 
               />
-            </div>
-            <div className="grid gap-2">
+              {errors.email && <FieldDescription className="text-destructive text-xs">{errors.email.message}</FieldDescription>}
+            </Field>
+
+            <Field className="grid gap-2">
               <Label htmlFor="password">Senha</Label>
-              <Input id="password" type="password" {...register("password")} />
-            </div>
+              <InputGroup className={errors.password ? 'border-red-500' : ''}>
+                <InputGroupInput
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  {...register("password", { required: "Informe sua senha" })}
+                />
+                <InputGroupAddon align="inline-end" className="cursor-pointer" onClick={() => setShowPassword(!showPassword)}>
+                  {showPassword ? <EyeOffIcon /> : <Eye />}
+                </InputGroupAddon>
+              </InputGroup>
+              {errors.password && <FieldDescription className="text-destructive text-xs">{errors.password.message}</FieldDescription>}
+            </Field>
+
             <button type="submit" className="hidden"></button>
           </form>
         </CardContent>
