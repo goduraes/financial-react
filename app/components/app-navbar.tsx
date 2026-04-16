@@ -3,7 +3,7 @@ import { useSidebar } from "./ui/sidebar";
 import { useEffect } from "react";
 
 const AppNavbar = () => {
-    const { open, setOpen } = useSidebar();
+    const { toggleSidebar, open, setOpen } = useSidebar();
 
     const isSidebarOpenValid = (str: string) => {
         try {
@@ -21,7 +21,7 @@ const AppNavbar = () => {
 
     const changeSideBarState = () => {
         localStorage.setItem('sidebarOpen', JSON.stringify(!open));
-        setOpen(!open);
+        toggleSidebar()
     };
 
     return (
