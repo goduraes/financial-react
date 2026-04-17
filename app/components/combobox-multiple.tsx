@@ -15,6 +15,7 @@ import {
   ComboboxValue,
   useComboboxAnchor,
 } from "~/components/ui/combobox"
+import { getContrastColor } from "~/helper/tag-color"
 
 export type OptionComboMultiple = {
   label: string;
@@ -56,12 +57,14 @@ export function ComboboxMultiple({
           <ComboboxValue>
             {(values) => (
               <>
-                {values.map((v: string) => (
-                  <ComboboxChip className="z-20" style={{ background: items.find((el) => el.value === v)?.color || '' }} key={v}>
-                    {map.get(v) ?? v}
-                  </ComboboxChip>
-                ))}
-                <ComboboxChipsInput className="absolute z-10" placeholder={placeholder} />
+                {values.map((v: string) => {
+                  const color = items.find((el) => el.value === v)?.color || '';
+                  return (
+                    <ComboboxChip className="text-sm" style={{ background: color, color: getContrastColor(color) }} key={v}>
+                      {map.get(v) ?? v}
+                    </ComboboxChip>
+                )})}
+                {!values.length ? <ComboboxChipsInput placeholder={placeholder} /> : null}
               </>
             )}
           </ComboboxValue>
@@ -76,7 +79,9 @@ export function ComboboxMultiple({
         <ComboboxList>
           {items.map((item) => (
             <ComboboxItem key={item.value} value={item.value}>
-              {item.label}
+              <span className="flexinnline px-1.5 py-[3px] font-medium rounded-sm text-sm" style={{ background: `${item.color}`, color: getContrastColor(item.color) }}>
+                {item.label}
+              </span>
             </ComboboxItem>
           ))}
         </ComboboxList>

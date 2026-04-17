@@ -3,8 +3,11 @@
 import {
   ChevronsUpDown,
   LogOut,
+  Moon,
+  Sun,
   User
 } from "lucide-react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router"
 
 import {
@@ -35,6 +38,11 @@ const NavUser = () => {
   const { isMobile } = useSidebar()
   const navigate = useNavigate();
   const { user } = useMe();
+
+  const [darkTheme, setDarkTheme] = useState<boolean>(() => {
+    const saved = localStorage.getItem("darkTheme");
+    return saved ? JSON.parse(saved) : true;
+  });
   
   return (
     <SidebarMenu>
@@ -83,6 +91,14 @@ const NavUser = () => {
               }}>
                 <User />
                 Perfil
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer" onClick={() => {
+                setDarkTheme(!darkTheme);
+                localStorage.setItem('darkTheme', JSON.stringify(!darkTheme))
+                document.documentElement.classList.toggle("dark", !darkTheme);
+              }}>
+                { darkTheme ? <Sun /> : <Moon /> }
+                <span>{ darkTheme ? 'Tema claro' : 'Tema escuro' }</span>
               </DropdownMenuItem>
             </DropdownMenuGroup>
 

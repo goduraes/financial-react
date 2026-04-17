@@ -1,67 +1,25 @@
 import { useEffect, useRef, useState } from "react";
 import AppBreadcrumb from "~/components/app-breadcrumb";
 import { useApi } from "~/hooks/useApi";
-import { getUsers } from "~/services/users";
+import { changeRoleUser, getUsers, toggleUserStatus } from "~/services/users";
 import { type ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "~/components/data-table";
 import AppPagination from "~/components/app-pagination";
 import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
-import { Pencil, Trash } from "lucide-react";
 import { format } from 'date-fns'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "~/components/ui/select";
+import { Switch } from "~/components/ui/switch";
+import { appToast } from "~/lib/toast";
 
 export type User = {
     id: number
     name: string;
     role: string;
     email: string;
+    is_active: boolean;
     created_at: Date;
     updated_at: Date;
 }
-
-export const columns: ColumnDef<User>[] = [
-  { accessorKey: "id", header: "ID", meta: { width: "16,66%" } },
-  { accessorKey: "name", header: "Name", meta: { width: "16,66%" } },
-  { accessorKey: "email", header: "E-mail", meta: { width: "16,66%" } },
-  { accessorKey: "role", header: "Role", meta: { width: "16,66%" } },
-  {
-    accessorKey: "created_at",
-    header: "Data de criação",
-    meta: { width: "16,66%" },
-    cell: ({ row }) => {
-        const item = row.original;
-        return <span>{item.created_at ? format(item.created_at, "dd/MM/yyyy HH:mm") : '-'}</span>
-    },
-  },
-  {
-    accessorKey: "updated_at",
-    header: "Data de edição",
-    meta: { width: "16,66%" },
-    cell: ({ row }) => {
-        const item = row.original;
-        return <span>{item.updated_at ? format(item.updated_at, "dd/MM/yyyy HH:mm") : '-'}</span>
-    },
-  },
-  {
-    id: "actions",
-    header: "Ações",
-    meta: { width: "100px" },
-    cell: ({ row }) => {
-      const item = row.original;
-      return (
-        <div className="flex gap-4">
-          <Button variant="secondary" size="icon" className="cursor-pointer">
-            <Pencil />
-          </Button>
-
-          <Button variant="destructive" size="icon" className="cursor-pointer">
-            <Trash />
-          </Button>
-        </div>
-      );
-    },
-  },
-];
 
 const Users = () => {
     const { request } = useApi();
@@ -71,6 +29,72 @@ const Users = () => {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
     const [perPage, setPerPage] = useState(10);
+
+    const columns: ColumnDef<User>[] = [
+      { accessorKey: "id", header: "ID", meta: { width: "14,28%" } },
+      { accessorKey: "name", header: "Name", meta: { width: "14,28%" } },
+      { accessorKey: "email", header: "E-mail", meta: { width: "14,28%" } },
+      { 
+        accessorKey: "role", 
+        header: "Role", 
+        meta: { width: "14,28%" }, 
+        cell: ({ row }) => {
+          const item = row.original;
+          return (
+            <Select value={item.role} onValueChange={(value) => {
+              updateUsersRole(item.id, value);
+              item.role = value;
+            }}>
+              <SelectTrigger className="w-full min-w-48">
+                <SelectValue placeholder="Role" />
+              </SelectTrigger>
+              <SelectContent position="popper">
+                <SelectGroup>
+                  <SelectItem value="ADMIN">ADMIN</SelectItem>
+                  <SelectItem value="COMMON">COMMON</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          )
+        },
+      },
+      {
+        accessorKey: "created_at",
+        header: "Data de criação",
+        meta: { width: "14,28%" },
+        cell: ({ row }) => {
+            const item = row.original;
+            return <span>{item.created_at ? format(item.created_at, "dd/MM/yyyy HH:mm") : '-'}</span>
+        },
+      },
+      {
+        accessorKey: "updated_at",
+        header: "Data de edição",
+        meta: { width: "14,28%" },
+        cell: ({ row }) => {
+            const item = row.original;
+            return <span>{item.updated_at ? format(item.updated_at, "dd/MM/yyyy HH:mm") : '-'}</span>
+        },
+      },
+      { 
+        accessorKey: "is_active", 
+        header: "Ativo", 
+        meta: { width: "14,28%" }, 
+        cell: ({ row }) => {
+          const item = row.original;
+          return (
+            <Switch
+              id="switch-focus-mode"
+              checked={item.is_active}
+              onCheckedChange={(value) => {
+                updateUsersStatus(item.id, value);
+                item.is_active = value;
+              }}
+            />
+          );
+        },
+      },
+    ];
     
     const loadUsers = async (page: number, perPage: number, search = '') => {
         setUsers([]);
@@ -81,6 +105,28 @@ const Users = () => {
             setTotalPages(users.totalPages);
           }
         } catch (e) {}
+    };
+
+    const updateUsersRole = async (id: number, role: string) => {
+      try {
+        const user = await request(() => changeRoleUser(id, role), true, false);
+        if (user && user.data) {
+          appToast.success('Usuário atualizado com sucesso!');
+        }
+      } catch (e) {
+        loadUsers(page, perPage, search);
+      }
+    };
+
+    const updateUsersStatus = async (id: number, is_active: boolean) => {
+      try {
+        const user = await request(() => toggleUserStatus(id, is_active), true, false);
+        if (user && user.data) {
+          appToast.success('Usuário atualizado com sucesso!');
+        }
+      } catch (e) {
+        loadUsers(page, perPage, search);
+      }
     };
 
     useEffect(() => {
@@ -100,7 +146,10 @@ const Users = () => {
                 className="w-full md:w-1/2 lg:w-1/3"
                 onChange={(e) => setSearch(e.target.value)} 
                 onKeyDown={(e) => {
-                    if (e.key === "Enter") loadUsers(page, perPage, search);
+                    if (e.key === "Enter") {
+                      setPage(1)
+                      loadUsers(1, perPage, search);
+                    };
                 }}
             />
 

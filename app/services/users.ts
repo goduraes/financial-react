@@ -11,3 +11,11 @@ export const getUserById = (id: number) => {
 export const registerUser = (data: { name: string, email: string, password: string }) => {
     return api.post(`/users/add`, data);
 }
+
+export const changeRoleUser = (id: number, role: string) => {
+    return api.patch(`/users/change-role/${id}`, { role });
+}
+
+export const toggleUserStatus = (id: number, is_active: boolean) => {
+    return api.patch(`/users/toggle-status/${id}`, { is_active });
+}

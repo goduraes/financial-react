@@ -1,5 +1,5 @@
 import { Loader2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, type SubmitHandler, Controller } from "react-hook-form";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "~/components/ui/dialog";
@@ -11,46 +11,62 @@ import { getTags } from "~/services/tags";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { DatePicker } from "./date-picker";
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
-import type { OptionComboMultiple } from "./combobox-multiple";
 import type { Tag } from "~/routes/tags";
-import { addTransactions, editTagTransactions } from "~/services/transactions";
+import { addTransactions, editTransactions } from "~/services/transactions";
 import { appToast } from "~/lib/toast";
+import type { Transaction } from "~/routes/transactions";
+import { getContrastColor } from "~/helper/tag-color";
+import { currencyFormat, currencyFormatToNumber } from "~/helper/currency";
 
-export type Transactions = {
+export type TransactionsInputs = {
   id?: number
   description: string;
-  value: number;
+  value: string;
   type: string;
   date: Date;
   tag_id: string;
 }
 
+export type TransactionsInputsNumberValue =
+  Omit<TransactionsInputs, "value"> & {
+    value: number;
+  };
+
 const ModalRegisterTransaction = ({ 
     open, 
-    onOpenChange 
+    onOpenChange,
+    onSuccess,
+    transaction
 }: { 
     open: boolean, 
-    onOpenChange: (open: boolean) => void 
+    onOpenChange: (open: boolean) => void,
+    onSuccess: () => void;
+    transaction?: Transaction
 }) => {
     const [tags, setTags] = useState<Tag[]>([]);
     const { request } = useApi();
-    const { register, handleSubmit, setValue, watch, reset, control, formState: { errors, isSubmitting } } = useForm<Transactions>({
-        defaultValues: {
-            type: 'INCOME',
-            tag_id: ''
-        }
+    const { register, handleSubmit, setValue, watch, reset, control, formState: { errors, isSubmitting } } = useForm<TransactionsInputs>({
+      defaultValues: {
+        id: undefined,
+        description: '',
+        value: 'R$ 0.00',
+        date: undefined,
+        type: 'INCOME',
+        tag_id: ''
+      }
     });
-    const onSubmit: SubmitHandler<Transactions> = async (data) => await addAndEditTransaction(data);
+    const onSubmit: SubmitHandler<TransactionsInputs> = async (data) => await addAndEditTransaction(data);
 
-    const addAndEditTransaction = async (data: Transactions) => {
+    const addAndEditTransaction = async (data: TransactionsInputs) => {
         if (isSubmitting) return;
         try {
-        const response = await request(() => data.id ? editTagTransactions(data) : addTransactions(data), true, false);
+          const dataRequest: TransactionsInputsNumberValue = { ...data, value: currencyFormatToNumber(data.value) };
+          const response = await request(() => data.id ? editTransactions(dataRequest) : addTransactions(dataRequest), true, false);
         if (response && response.data) {
             appToast.success(data.id ? 'Transactions editada com sucesso!' : 'Transactions adicionada com sucesso!');
             onOpenChange(false);
             reset();
-            loadTags();
+            onSuccess();
         }
         } catch (e) {}
     };
@@ -65,6 +81,25 @@ const ModalRegisterTransaction = ({
 
     useEffect(() => {
         if (!open) return;
+        if (transaction) {
+          reset({
+            id: transaction.id,
+            description: transaction.description,
+            value: transaction.value ? currencyFormat(transaction.value) : 'R$ 0,00',
+            date: transaction.date,
+            tag_id: String(transaction.tag_id),
+            type: transaction.type
+          })
+        } else {
+          reset({
+            id: undefined,
+            description: '',
+            value: 'R$ 0,00',
+            date: undefined,
+            type: 'INCOME',
+            tag_id: ''
+          });
+        }
         loadTags();
     }, [open]);
 
@@ -81,7 +116,7 @@ const ModalRegisterTransaction = ({
             onSubmit={handleSubmit(onSubmit)}
             className="flex flex-col gap-4"
           >
-            <Tabs defaultValue="INCOME">
+            <Tabs defaultValue={transaction ? transaction.type : 'INCOME'}>
               <TabsList variant="default" className="flex gap-4 w-full">
                 <TabsTrigger
                   value="INCOME"
@@ -99,6 +134,7 @@ const ModalRegisterTransaction = ({
                 </TabsTrigger>
               </TabsList>
             </Tabs>
+
             <Field className="grid gap-2">
               <Label htmlFor="description">Descrição</Label>
               <Input
@@ -116,10 +152,24 @@ const ModalRegisterTransaction = ({
             </Field>
             <Field className="grid gap-2">
               <Label htmlFor="name">Valor</Label>
-              <Input
-                id="name"
-                className={errors.value ? "border-red-500" : ""}
-                {...register("value", { required: "Valor é obrigatório" })}
+              <Controller
+                name="value"
+                control={control}
+                rules={{ 
+                  required: "Valor é obrigatória",
+                  validate: (v) => currencyFormatToNumber(v) > 0 || "Valor é obrigatório",
+                }}
+                render={({ field }) => (
+                  <Input
+                    value={field.value}
+                    className={errors.value ? "border-red-500" : ""}
+                    onChange={(e) => {
+                      const number = currencyFormatToNumber(e.target.value);
+                      field.onChange(currencyFormat(number));
+                    }}
+                    inputMode="numeric"
+                  />
+                )}
               />
               {errors.value && (
                 <FieldDescription className="text-destructive text-xs">
@@ -164,9 +214,10 @@ const ModalRegisterTransaction = ({
                     <SelectContent position="popper">
                       <SelectGroup>
                         {tags.map((tag) => (
-                            <SelectItem key={tag.id} value={String(tag.id)}>
-                                <div className="w-5 h-5 rounded-full" style={{ background: tag.color }}></div>
-                                <span>{tag.name}</span>
+                            <SelectItem key={tag.id} value={String(tag.id)}>                                
+                              <span className="flexinnline px-1.5 py-[3px] font-medium rounded-sm text-sm" style={{ background: `${tag.color}`, color: getContrastColor(tag.color) }}>
+                                {tag.name}
+                              </span>
                             </SelectItem>
                         ))}
                       </SelectGroup>

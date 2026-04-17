@@ -12,6 +12,7 @@ import { useApi } from "~/hooks/useApi";
 import { getTags } from "~/services/tags";
 import type { Tag } from "~/routes/tags";
 import { startOfMonth, lastDayOfMonth, format } from 'date-fns';
+import type { getTransactionsFilter } from "~/services/transactions";
 
 type FormData = {
   from: Date
@@ -22,10 +23,10 @@ export type InputsFilters = {
   search: string
   tags: string[];
   period?: FormData;
-  type: string
+  type: 'ALL' | "INCOME" | "EXPENSE"
 }
 
-const TransactionsFilters = ({ emitFilters }: { emitFilters: (filter: InputsFilters) => void }) => {
+const TransactionsFilters = ({ emitFilters }: { emitFilters: (filter: getTransactionsFilter) => void }) => {
   const ran = useRef(false);
   const { request } = useApi();
   const [tags, setTags] = useState<OptionComboMultiple[]>([]);
@@ -45,7 +46,16 @@ const TransactionsFilters = ({ emitFilters }: { emitFilters: (filter: InputsFilt
             to: lastDayOfMonth(new Date())
         },
     }});
-  const onSubmit: SubmitHandler<InputsFilters> = (data) => emitFilters(data);
+  const onSubmit: SubmitHandler<InputsFilters> = (data) => {
+    const filters: getTransactionsFilter = {
+      search: data.search || '',
+      tags: data.tags || [],
+      type: data.type === 'ALL' ? '' : data.type,
+      startDate: data.period && data.period.from ? format(data.period.from, 'yyyy-MM-dd') : '', 
+      endDate: data.period && data.period.to ? format(data.period.to, 'yyyy-MM-dd') : '', 
+    }
+    emitFilters(filters);
+  };
 
   const loadTags = async () => {
     setTags([]);

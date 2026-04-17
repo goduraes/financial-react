@@ -136,7 +136,7 @@ const Tags = () => {
             <div className="flex justify-end items-end gap-4">
               <Field className="grid gap-2 w-14 outline-0">
                 <Label htmlFor="color">Cor</Label>
-                <Input id="color" {...register("color")} />
+                <Input id="color" type="color" {...register("color")} />
               </Field>
               <Field className="grid gap-2">
                 <Label htmlFor="name">Nome</Label>

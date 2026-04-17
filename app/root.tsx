@@ -15,6 +15,12 @@ import { TooltipProvider } from "~/components/ui/tooltip";
 import { UserProvider } from "./contexts/userProvider";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
+  useEffect(() => {
+    const saved = localStorage.getItem("darkTheme");
+    const isDark = saved ? JSON.parse(saved) : true;
+    document.documentElement.classList.toggle("dark", isDark);
+  }, []);
+
   return (
     <html lang="en" className="dark">
       <head>

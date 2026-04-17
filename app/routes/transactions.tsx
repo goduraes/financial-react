@@ -1,4 +1,4 @@
-import { Pencil, Plus, Trash } from "lucide-react";
+import { Loader2, Pencil, Plus, Trash } from "lucide-react";
 import { useState, useEffect } from "react";
 import AppBreadcrumb from "~/components/app-breadcrumb";
 import { Button } from "~/components/ui/button";
@@ -6,35 +6,80 @@ import { useApi } from "~/hooks/useApi";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "~/components/data-table";
 import AppPagination from "~/components/app-pagination";
-import TransactionsFilters, { type InputsFilters } from "~/components/transations-filters";
-import ModalRegisterTransaction from "~/components/modal-register-transaction";
-import { getTransactions } from "~/services/transactions";
+import TransactionsFilters from "~/components/transations-filters";
+import { deleteTransactions, getTransactions, type getTransactionsFilter } from "~/services/transactions";
 import { format } from "date-fns";
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "~/components/ui/alert-dialog";
+import { appToast } from "~/lib/toast";
+import ModalRegisterTransaction from "~/components/modal-register-transaction";
+import { getContrastColor } from "~/helper/tag-color";
+import { currencyFormat } from "~/helper/currency";
+
+export type Transaction = {
+  id?: number
+  user_id: number
+  description: string
+  value: number
+  type: "INCOME" | "EXPENSE"
+  date: Date
+  tag_id: number | null
+  created_at?: string
+  updated_at?: string | null
+  tag_name: string | null
+  tag_color: string | null
+}
 
 const Transactions = () => {
-  const { request } = useApi();
-  const [filters, setFilters] = useState<InputsFilters>();
+  const { request, loading } = useApi();
+  const [filters, setFilters] = useState<getTransactionsFilter>();
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [perPage, setPerPage] = useState(10);
-  const [Transactions, setTransactions] = useState<any[]>([]);
-  const [open, setOpen] = useState(false);
+  const [Transactions, setTransactions] = useState<Transaction[]>([]);
 
-  const columns: ColumnDef<any>[] = [
+  const [open, setOpen] = useState(false);
+  const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState(false);
+
+  const [transactionToDelete, setTransactionToDelete] = useState<Transaction>();
+  const [transactionToEdit, setTransactionToEdit] = useState<Transaction>();
+
+  const columns: ColumnDef<Transaction>[] = [
     { accessorKey: "description", header: "Descrição", meta: { width: "25%" } },
-    { accessorKey: "value", header: "Valor", meta: { width: "25%" } },
+    {
+      accessorKey: "value",
+      header: "Valor",
+      meta: { width: "25%" },
+      cell: ({ row }) => {
+        const item = row.original;
+        return (
+          <span className={`font-bold ${item.type === "INCOME" ? "text-green-600" : "text-destructive"}`}>
+            {item.type === "INCOME" ? '' : '-'} {currencyFormat(item.value)} 
+          </span>
+        );
+      },
+    },
     {
       accessorKey: "date",
       header: "Data",
       meta: { width: "25%" },
       cell: ({ row }) => {
         const item = row.original;
+        return <span>{item.date ? format(item.date, "dd/MM/yyyy") : "-"}</span>;
+      },
+    },
+    {
+      accessorKey: "tag_name",
+      header: "Tag",
+      meta: { width: "25%" },
+      cell: ({ row }) => {
+        const item = row.original;
         return (
-          <span>{item.date ? format(item.date, "dd/MM/yyyy"): "-"}</span>
+          <span className="flexinnline px-1.5 py-[3px] font-medium rounded-sm text-sm" style={{ background: `${item.tag_color}`, color: getContrastColor(item.tag_color) }}>
+            {item.tag_name}
+          </span>
         );
       },
     },
-    { accessorKey: "tag_name", header: "Tag", meta: { width: "25%" } },
     {
       id: "actions",
       header: "Ações",
@@ -43,11 +88,27 @@ const Transactions = () => {
         const item = row.original;
         return (
           <div className="flex gap-4">
-            <Button variant="secondary" size="icon" className="cursor-pointer" onClick={() => setOpen(true)}>
+            <Button
+              variant="secondary"
+              size="icon"
+              className="cursor-pointer"
+              onClick={() => {
+                setTransactionToEdit(item);
+                setOpen(true);
+              }}
+            >
               <Pencil />
             </Button>
-  
-            <Button variant="destructive" size="icon" className="cursor-pointer">
+
+            <Button
+              variant="destructive"
+              size="icon"
+              className="cursor-pointer"
+              onClick={() => {
+                setTransactionToDelete(item);
+                setOpenDeleteConfirmation(true);
+              }}
+            >
               <Trash />
             </Button>
           </div>
@@ -56,26 +117,55 @@ const Transactions = () => {
     },
   ];
 
-  const loadTransactions = async () => {
+  const loadTransactions = async (data: getTransactionsFilter) => {
     setTransactions([]);
     try {
-      const loadedTags = await request(() => getTransactions());
-      if (loadedTags && loadedTags.data) setTransactions(loadedTags.data);
+      const loadedTags = await request(() => getTransactions(data));
+      if (loadedTags && loadedTags.data) {
+        setTransactions(loadedTags.data);
+        setTotalPages(loadedTags.totalPages);
+      }
+    } catch (e) {}
+  };
+
+  const removeTransaction = async () => {
+    if (!filters) return;
+    try {
+      const response = await request(() => deleteTransactions(transactionToDelete?.id || 0), false);
+      if (response && response.data) {
+        appToast.success('Transação removida com sucesso!');
+        setOpenDeleteConfirmation(false);
+        setTransactionToDelete(undefined);
+        loadTransactions({ page, perPage, ...filters });
+      }
     } catch (e) {}
   };
 
   useEffect(() => {
     if (!filters) return;
-    loadTransactions();
-    console.log(filters);
+    setPage(1)
+    loadTransactions({ page: 1, perPage, ...filters });
   }, [filters]);
+
+  useEffect(() => {
+    if (!filters) return;
+    loadTransactions({ page, perPage, ...filters });
+  }, [page, perPage]);
 
   return (
     <div className="flex flex-col gap-4">
-      <AppBreadcrumb data={[{ text: 'Transações' }]} />
+      <AppBreadcrumb data={[{ text: "Transações" }]} />
 
       <div className="flex justify-end">
-        <Button variant="secondary" size="icon" className="cursor-pointer" onClick={() => setOpen(true)}>
+        <Button
+          variant="secondary"
+          size="icon"
+          className="cursor-pointer"
+          onClick={() => {
+            setTransactionToEdit(undefined);
+            setOpen(true);
+          }}
+        >
           <Plus />
         </Button>
       </div>
@@ -83,18 +173,62 @@ const Transactions = () => {
       <TransactionsFilters emitFilters={(filter) => setFilters(filter)} />
 
       <DataTable columns={columns} data={Transactions} />
-      
+
       {totalPages ? (
         <AppPagination
-            page={page}
-            totalPages={totalPages}
-            perPage={perPage}
-            onPageChange={(newPage) => console.log(newPage)}
-            onPerPageChange={(newPerPage) => console.log(newPerPage)}
+          page={page}
+          totalPages={totalPages}
+          perPage={perPage}
+          onPageChange={(newPage) => {
+            if (newPage === page) return;
+            setPage(newPage);
+          }}
+          onPerPageChange={(newPerPage) => {
+              if (newPerPage === perPage) return;
+              setPerPage(newPerPage);
+          }}
         />
-      ): null}
+      ) : null}
 
-      <ModalRegisterTransaction open={open} onOpenChange={setOpen} />
+      <ModalRegisterTransaction
+        open={open}
+        onOpenChange={setOpen}
+        transaction={transactionToEdit}
+        onSuccess={() => {
+          if (filters) loadTransactions({ page, perPage, ...filters })
+        }}
+      />
+
+      <AlertDialog
+        open={openDeleteConfirmation}
+        onOpenChange={setOpenDeleteConfirmation}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {transactionToDelete?.description}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir esta transação?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="cursor-pointer">
+              Cancelar
+            </AlertDialogCancel>
+            <Button
+              className="cursor-pointer"
+              onClick={() => removeTransaction()}
+            >
+              {loading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                "Confirmar"
+              )}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
