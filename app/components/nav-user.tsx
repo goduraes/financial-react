@@ -31,7 +31,7 @@ import { useMe } from "~/hooks/useMe"
 import { logout } from "~/services/auth"
 
 const NavUser = () => {
-  const { toggleSidebar, open } = useSidebar();
+  const { toggleSidebar } = useSidebar();
   const { isMobile } = useSidebar()
   const navigate = useNavigate();
   const { user } = useMe();

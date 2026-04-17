@@ -25,10 +25,14 @@ const AppNavbar = () => {
     };
 
     return (
-        <div onClick={changeSideBarState} className="cursor-pointer">
-            {open ? <PanelLeftClose className="w-4.5" /> : <PanelLeftOpen className="w-4.5" />}
-            <span className="sr-only">Toggle Sidebar</span>
-        </div>
+        <div className={`fixed h-12.5 p-3.5 flex justify-between items-center bg-background md:bg-primary-foreground transition-[width] duration-200 ease-linear ${open ? 'w-[calc(100%-256px)]' : 'w-[calc(100%-66px)]'}`}>
+            <div onClick={changeSideBarState} className="cursor-pointer">
+                {open ? <PanelLeftClose className="w-4.5" /> : <PanelLeftOpen className="w-4.5" />}
+                <span className="sr-only">Toggle Sidebar</span>
+            </div>
+            <span>Finanças Pessoais</span>
+            <div></div>
+        </div>   
     )
 }
 
