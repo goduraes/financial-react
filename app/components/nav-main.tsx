@@ -19,6 +19,7 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "~/components/ui/sidebar"
+import { useIsMobile } from "~/hooks/use-mobile"
 import { useMe } from "~/hooks/useMe"
 
 const NavMain = ({
@@ -39,10 +40,10 @@ const NavMain = ({
 }) => {
   const location = useLocation();
   const { user } = useMe();
-  const { toggleSidebar, open } = useSidebar();
+  const { toggleSidebar, open, isMobile } = useSidebar();
 
   const changeSideBarState = () => {
-    if (open) return;
+    if (open || isMobile) return;
     localStorage.setItem('sidebarOpen', JSON.stringify(true));
     toggleSidebar();
 };
@@ -75,7 +76,7 @@ const NavMain = ({
                       {item.items?.map((subItem) => (
                         <SidebarMenuSubItem key={subItem.title} >
                           <SidebarMenuSubButton asChild isActive={location.pathname === subItem.url}>
-                            <Link to={subItem.url}>
+                            <Link to={subItem.url} onClick={() => isMobile ? toggleSidebar() : null}>
                               {subItem.icon && <subItem.icon />}
                               <span>{subItem.title}</span>
                             </Link>
@@ -92,7 +93,7 @@ const NavMain = ({
           return (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild tooltip={item.title} isActive={location.pathname === item.url}>
-                <Link to={item.url || ''} >
+                <Link to={item.url || ''} onClick={() => isMobile ? toggleSidebar() : null}>
                   {item.icon && <item.icon />}
                   <span>{item.title}</span>
                 </Link>

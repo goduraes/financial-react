@@ -3,6 +3,7 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  useSidebar,
 } from "~/components/ui/sidebar"
 import {
   Home,
@@ -15,6 +16,7 @@ import {
 import NavUser from "./nav-user"
 import NavMain from "./nav-main"
 import { Link } from "react-router";
+import { useIsMobile } from "~/hooks/use-mobile";
 
 const data = [
   {
@@ -47,11 +49,13 @@ const data = [
 ];
 
 const AppSidebar = () => {
+  const { toggleSidebar, isMobile } = useSidebar();
+
   return (
     <Sidebar variant="inset" collapsible="icon" className="border-r">
       <SidebarHeader>
         <div className="flex justify-center">
-          <Link to="/"><Wallet /></Link>
+          <Link to="/" onClick={() => isMobile ? toggleSidebar() : null}><Wallet /></Link>
         </div>
       </SidebarHeader>
       <SidebarContent>

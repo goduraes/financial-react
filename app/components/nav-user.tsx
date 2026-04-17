@@ -31,6 +31,7 @@ import { useMe } from "~/hooks/useMe"
 import { logout } from "~/services/auth"
 
 const NavUser = () => {
+  const { toggleSidebar, open } = useSidebar();
   const { isMobile } = useSidebar()
   const navigate = useNavigate();
   const { user } = useMe();
@@ -76,7 +77,10 @@ const NavUser = () => {
             <DropdownMenuSeparator />
 
             <DropdownMenuGroup>
-              <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/profile')}>
+              <DropdownMenuItem className="cursor-pointer" onClick={() => {
+                if(isMobile) toggleSidebar();
+                navigate('/profile');
+              }}>
                 <User />
                 Perfil
               </DropdownMenuItem>
