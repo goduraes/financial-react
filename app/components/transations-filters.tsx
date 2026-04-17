@@ -25,7 +25,7 @@ export type InputsFilters = {
   type: string
 }
 
-const TransationsFilters = ({ emitFilters }: { emitFilters: (filter: InputsFilters) => void }) => {
+const TransactionsFilters = ({ emitFilters }: { emitFilters: (filter: InputsFilters) => void }) => {
   const ran = useRef(false);
   const { request } = useApi();
   const [tags, setTags] = useState<OptionComboMultiple[]>([]);
@@ -39,7 +39,7 @@ const TransationsFilters = ({ emitFilters }: { emitFilters: (filter: InputsFilte
     defaultValues: {
         search: '',
         tags: [],
-        type: "all",
+        type: "ALL",
         period: { 
             from: startOfMonth(new Date()), 
             to: lastDayOfMonth(new Date())
@@ -116,26 +116,26 @@ const TransationsFilters = ({ emitFilters }: { emitFilters: (filter: InputsFilte
 
         <Field>
             <Controller
-            name="type"
-            control={control}
-            render={({ field }) => (
-                <Select
-                value={field.value}
-                onValueChange={field.onChange}
-                >
-                <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
+              name="type"
+              control={control}
+              render={({ field }) => (
+                  <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  >
+                  <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione o tipo" />
+                  </SelectTrigger>
 
-                <SelectContent position="popper">
-                    <SelectGroup>
-                    <SelectItem value="all">Todos</SelectItem>
-                    <SelectItem value="R" className="text-green-600">Receitas</SelectItem>
-                    <SelectItem value="D" className="text-destructive">Despesas</SelectItem>
-                    </SelectGroup>
-                </SelectContent>
-                </Select>
-            )}
+                  <SelectContent position="popper">
+                      <SelectGroup>
+                      <SelectItem value="ALL">Todos</SelectItem>
+                      <SelectItem value="INCOME" className="text-green-600">Receitas</SelectItem>
+                      <SelectItem value="EXPENSE" className="text-destructive">Despesas</SelectItem>
+                      </SelectGroup>
+                  </SelectContent>
+                  </Select>
+              )}
             />
         </Field>
         </div>
@@ -155,4 +155,4 @@ const TransationsFilters = ({ emitFilters }: { emitFilters: (filter: InputsFilte
   );
 }
 
-export default TransationsFilters;
+export default TransactionsFilters;

@@ -26,7 +26,7 @@ const data = [
   },
   {
     title: "Transações",
-    url: "/transations",
+    url: "/transactions",
     icon: ArrowLeftRight,
   },
   {

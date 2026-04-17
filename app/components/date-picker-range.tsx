@@ -40,7 +40,7 @@ export function DatePickerWithRange({
             {value?.from ? (
               value.to ? (
                 <div className="truncate text-sm">
-                  {format(value.from, "dd/MM/yyyy")} -{" "}
+                  {format(value.from, "dd/MM/yyyy")} - {" "}
                   {format(value.to, "dd/MM/yyyy")}
                 </div>
               ) : (

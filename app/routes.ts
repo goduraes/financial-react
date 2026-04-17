@@ -6,7 +6,7 @@ export default [
     layout("routes/protected-route.tsx", [
         index("routes/home.tsx"),
         route("profile", "routes/profile.tsx"),
-        route("transations", "routes/transations.tsx"),
+        route("transactions", "routes/transactions.tsx"),
         route("tags", "routes/tags.tsx"),
         route("admin/users", "routes/admin/users.tsx"),
     ]),

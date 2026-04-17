@@ -115,7 +115,7 @@ const Tags = () => {
   }, []);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 h-[1200px]">
       <AppBreadcrumb data={[{ text: 'Tags' }]} />
 
       <div className="flex justify-end">
@@ -136,11 +136,11 @@ const Tags = () => {
             <div className="flex justify-end items-end gap-4">
               <Field className="grid gap-2 w-14 outline-0">
                 <Label htmlFor="color">Cor</Label>
-                <Input id="color" type="color" {...register("color")} />
+                <Input id="color" {...register("color")} />
               </Field>
               <Field className="grid gap-2">
                 <Label htmlFor="name">Nome</Label>
-                <Input id="name" className={errors.name ? 'border-red-500' : ''} {...register("name", { required: "Nome é obrigatório" })} />
+                <Input id="name" className={errors.name ? 'border-red-500' : ''} {...register("name")} />
               </Field>
             </div>
             <DialogFooter>
