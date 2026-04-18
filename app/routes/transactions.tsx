@@ -190,7 +190,7 @@ const Transactions = () => {
 
       <TransactionsFilters emitFilters={(filter) => setFilters(filter)} />
 
-      <div className="flex flex-wrap justify-end gap-4">
+      <div className="flex flex-wrap justify-end gap-4 my-4">
         {cards.map((card, i) => {
           const value = summary && summary[card.prop as keyof Summary] ? summary[card.prop as keyof Summary] : 0;
           const valueFuncClass = card.valueFunc ? card.valueFunc(value) : '';
