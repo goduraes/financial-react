@@ -19,7 +19,6 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "~/components/ui/sidebar"
-import { useIsMobile } from "~/hooks/use-mobile"
 import { useMe } from "~/hooks/useMe"
 
 const NavMain = ({

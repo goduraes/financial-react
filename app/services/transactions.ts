@@ -8,6 +8,8 @@ export type getTransactionsFilter = {
     type: '' | "INCOME" | "EXPENSE";
     startDate: string;
     endDate: string;
+    order?: string;
+    sortBy?: string;
 }
 
 export const getTransactions = async ({
@@ -18,8 +20,10 @@ export const getTransactions = async ({
     type,
     startDate,
     endDate,
+    order = '',
+    sortBy = ''
 }: getTransactionsFilter) => {
-    return api.get(`/transactions?page=${page}&perPage=${perPage}&search=${search}&tags=${tags.join(",")}&type=${type}&startDate=${startDate}&endDate=${endDate}`);
+    return api.get(`/transactions?page=${page}&perPage=${perPage}&search=${search}&tags=${tags.join(",")}&type=${type}&startDate=${startDate}&endDate=${endDate}&order=${order}&sortBy=${sortBy}`);
 }
 
 export const addTransactions = (data: any) => {

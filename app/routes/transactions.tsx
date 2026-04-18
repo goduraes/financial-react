@@ -1,9 +1,9 @@
-import { Loader2, Pencil, Plus, Trash, TrendingUp } from "lucide-react";
+import { Loader2, Pencil, Plus, Trash, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { useState, useEffect } from "react";
 import AppBreadcrumb from "~/components/app-breadcrumb";
 import { Button } from "~/components/ui/button";
 import { useApi } from "~/hooks/useApi";
-import type { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import { DataTable } from "~/components/data-table";
 import AppPagination from "~/components/app-pagination";
 import TransactionsFilters from "~/components/transations-filters";
@@ -30,11 +30,17 @@ export type Transaction = {
   tag_color: string | null
 }
 
+export type SortingTransaction = {
+  sortBy: string;
+  order: string;
+}
+
 const cards = [
-  { label: "Receitas", prop: "total_expense", valueClass: "text-green-600" },
-  { label: "Despesas", prop: "total_income", valueClass: "text-destructive" },
+  { label: "Receitas", icon: TrendingUp, prop: "total_income", valueClass: "text-green-600" },
+  { label: "Despesas",  icon: TrendingDown, prop: "total_expense", valueClass: "text-destructive" },
   {
     label: "Resultado",
+    icon: Wallet,
     prop: "balance",
     valueFunc: (val: number) => {
       if (val > 0) return "text-green-600";
@@ -52,6 +58,8 @@ const Transactions = () => {
   const [perPage, setPerPage] = useState(10);
   const [summary, setSummary] = useState<Summary>();
   const [Transactions, setTransactions] = useState<Transaction[]>([]);
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sortingFilter, setSortingFilter] = useState<SortingTransaction>();
 
   const [open, setOpen] = useState(false);
   const [openDeleteConfirmation, setOpenDeleteConfirmation] = useState(false);
@@ -99,6 +107,7 @@ const Transactions = () => {
     {
       id: "actions",
       header: "Ações",
+      enableSorting: false,
       meta: { width: "100px" },
       cell: ({ row }) => {
         const item = row.original;
@@ -154,7 +163,7 @@ const Transactions = () => {
         appToast.success('Transação removida com sucesso!');
         setOpenDeleteConfirmation(false);
         setTransactionToDelete(undefined);
-        loadTransactions({ page, perPage, ...filters });
+        loadTransactions({ page, perPage, ...sortingFilter, ...filters });
       }
     } catch (e) {}
   };
@@ -162,13 +171,13 @@ const Transactions = () => {
   useEffect(() => {
     if (!filters) return;
     setPage(1)
-    loadTransactions({ page: 1, perPage, ...filters });
+    loadTransactions({ page: 1, perPage, ...sortingFilter, ...filters });
   }, [filters]);
 
   useEffect(() => {
     if (!filters) return;
-    loadTransactions({ page, perPage, ...filters });
-  }, [page, perPage]);
+    loadTransactions({ page, perPage, ...sortingFilter, ...filters });
+  }, [page, perPage, sortingFilter]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -192,22 +201,43 @@ const Transactions = () => {
 
       <div className="flex flex-wrap justify-end gap-4 my-4">
         {cards.map((card, i) => {
-          const value = summary && summary[card.prop as keyof Summary] ? summary[card.prop as keyof Summary] : 0;
-          const valueFuncClass = card.valueFunc ? card.valueFunc(value) : '';
+          const value =
+            summary && summary[card.prop as keyof Summary]
+              ? summary[card.prop as keyof Summary]
+              : 0;
+          const valueFuncClass = card.valueFunc ? card.valueFunc(value) : "";
 
           return (
             <div key={i} className="flex flex-col items-center gap-1">
               <div className="flex justify-center items-center gap-2 text-xs">
-                <TrendingUp className={`w-4 h-4 ${valueFuncClass} ${card.valueClass}`} />
+                <card.icon
+                  className={`w-4 h-4 ${valueFuncClass} ${card.valueClass}`}
+                />
                 <span>{card.label}</span>
               </div>
-              <span className={`font-bold ${valueFuncClass} ${card.valueClass}`}>{currencyFormat(value)}</span>
+              <span
+                className={`font-bold ${valueFuncClass} ${card.valueClass}`}
+              >
+                {currencyFormat(value)}
+              </span>
             </div>
-          )
+          );
         })}
       </div>
 
-      <DataTable columns={columns} data={Transactions} />
+      <DataTable
+        columns={columns}
+        data={Transactions}
+        enableSorting
+        manualSorting
+        sorting={sorting}
+        onSortingChange={(updater) => {
+          const newSorting = typeof updater === "function" ? updater(sorting) : updater;
+          setSorting(newSorting);
+          const sort = newSorting[0];
+          setSortingFilter(sort ? { sortBy: sort.id, order: sort.desc ? "desc" : "asc" } : undefined)
+        }}
+      />
 
       {totalPages ? (
         <AppPagination
@@ -219,8 +249,8 @@ const Transactions = () => {
             setPage(newPage);
           }}
           onPerPageChange={(newPerPage) => {
-              if (newPerPage === perPage) return;
-              setPerPage(newPerPage);
+            if (newPerPage === perPage) return;
+            setPerPage(newPerPage);
           }}
         />
       ) : null}
@@ -230,7 +260,7 @@ const Transactions = () => {
         onOpenChange={setOpen}
         transaction={transactionToEdit}
         onSuccess={() => {
-          if (filters) loadTransactions({ page, perPage, ...filters })
+          if (filters) loadTransactions({ page, perPage, ...sortingFilter, ...filters });
         }}
       />
 

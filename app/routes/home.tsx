@@ -28,8 +28,8 @@ const cards = [
       return '';
     },
   },
-  { label: "Receitas", prop: "total_expense", valueClass: "text-green-600" },
-  { label: "Despesas", prop: "total_income", valueClass: "text-destructive" },
+  { label: "Receitas", prop: "total_income", valueClass: "text-green-600" },
+  { label: "Despesas", prop: "total_expense", valueClass: "text-destructive" },
 ];
 
 const Home = () => {
