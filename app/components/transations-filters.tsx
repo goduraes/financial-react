@@ -14,7 +14,7 @@ import type { Tag } from "~/routes/tags";
 import { startOfMonth, lastDayOfMonth, format } from 'date-fns';
 import type { getTransactionsFilter } from "~/services/transactions";
 
-type FormData = {
+export type PeriodData = {
   from: Date
   to?: Date
 }
@@ -22,7 +22,7 @@ type FormData = {
 export type InputsFilters = {
   search: string
   tags: string[];
-  period?: FormData;
+  period?: PeriodData;
   type: 'ALL' | "INCOME" | "EXPENSE"
 }
 
@@ -81,73 +81,73 @@ const TransactionsFilters = ({ emitFilters }: { emitFilters: (filter: getTransac
     
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Field>
-            <InputGroup>            
-            <InputGroupInput
-                id="search"
-                placeholder="Pesquisar"
-                {...register("search")} 
-            />
-            <InputGroupAddon>
-                <Search />
-            </InputGroupAddon>
-            </InputGroup>
-        </Field>
+          <Field>
+              <InputGroup>            
+              <InputGroupInput
+                  id="search"
+                  placeholder="Pesquisar"
+                  {...register("search")} 
+              />
+              <InputGroupAddon>
+                  <Search />
+              </InputGroupAddon>
+              </InputGroup>
+          </Field>
 
-        <Field>
+          <Field>
+              <Controller
+              name="tags"
+              control={control}
+              render={({ field }) => {
+                  return (
+                  <ComboboxMultiple
+                      placeholder="Tags"
+                      items={tags}
+                      value={field.value}
+                      onChange={field.onChange}
+                  />
+                  )
+              }}
+              />
+          </Field>
+          
+          <Field>            
             <Controller
-            name="tags"
-            control={control}
-            render={({ field }) => {
-                return (
-                <ComboboxMultiple
-                    placeholder="Tags"
-                    items={tags}
-                    value={field.value}
-                    onChange={field.onChange}
-                />
-                )
-            }}
-            />
-        </Field>
-        
-        <Field>            
-            <Controller
-            name="period"
-            control={control}
-            render={({ field }) => (
-                <DatePickerWithRange
-                value={field.value}
-                onChange={field.onChange}
-                />
-            )}
-            />
-        </Field>
-
-        <Field>
-            <Controller
-              name="type"
+              name="period"
               control={control}
               render={({ field }) => (
-                  <Select
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  >
-                  <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecione o tipo" />
-                  </SelectTrigger>
-
-                  <SelectContent position="popper">
-                      <SelectGroup>
-                      <SelectItem value="ALL">Todos</SelectItem>
-                      <SelectItem value="INCOME" className="text-green-600">Receitas</SelectItem>
-                      <SelectItem value="EXPENSE" className="text-destructive">Despesas</SelectItem>
-                      </SelectGroup>
-                  </SelectContent>
-                  </Select>
+                  <DatePickerWithRange
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
               )}
             />
-        </Field>
+          </Field>
+
+          <Field>
+              <Controller
+                name="type"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+
+                    <SelectContent position="popper">
+                        <SelectGroup>
+                        <SelectItem value="ALL">Todos</SelectItem>
+                        <SelectItem value="INCOME" className="text-green-600">Receitas</SelectItem>
+                        <SelectItem value="EXPENSE" className="text-destructive">Despesas</SelectItem>
+                        </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+          </Field>
         </div>
         
         <div className="flex justify-end gap-4">

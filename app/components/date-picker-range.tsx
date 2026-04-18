@@ -26,7 +26,7 @@ export function DatePickerWithRange({
   label,
 }: Props) {
   return (
-    <Field className="mx-auto w-60">
+    <Field className="mx-auto w-full">
       {label ?  <FieldLabel>{label}</FieldLabel> : null}
      
       <Popover>

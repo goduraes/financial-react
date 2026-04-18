@@ -8,7 +8,6 @@ import { useApi } from "~/hooks/useApi";
 import { getMe } from "~/services/me";
 import AppLoadingScreen from "~/components/app-loading-screen";
 import { useLoading } from "~/hooks/useLoading";
-import { Card } from "~/components/ui/card";
 import AppNavbar from "~/components/app-navbar";
 
 const ProtectedRoute = () => {

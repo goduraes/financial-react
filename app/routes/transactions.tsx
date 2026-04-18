@@ -1,4 +1,4 @@
-import { Loader2, Pencil, Plus, Trash } from "lucide-react";
+import { Loader2, Pencil, Plus, Trash, TrendingUp } from "lucide-react";
 import { useState, useEffect } from "react";
 import AppBreadcrumb from "~/components/app-breadcrumb";
 import { Button } from "~/components/ui/button";
@@ -14,6 +14,7 @@ import { appToast } from "~/lib/toast";
 import ModalRegisterTransaction from "~/components/modal-register-transaction";
 import { getContrastColor } from "~/helper/tag-color";
 import { currencyFormat } from "~/helper/currency";
+import type { Summary } from "./home";
 
 export type Transaction = {
   id?: number
@@ -29,12 +30,27 @@ export type Transaction = {
   tag_color: string | null
 }
 
+const cards = [
+  { label: "Receitas", prop: "total_expense", valueClass: "text-green-600" },
+  { label: "Despesas", prop: "total_income", valueClass: "text-destructive" },
+  {
+    label: "Resultado",
+    prop: "balance",
+    valueFunc: (val: number) => {
+      if (val > 0) return "text-green-600";
+      if (val < 0) return "text-destructive";
+      return '';
+    },
+  },
+];
+
 const Transactions = () => {
   const { request, loading } = useApi();
   const [filters, setFilters] = useState<getTransactionsFilter>();
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [perPage, setPerPage] = useState(10);
+  const [summary, setSummary] = useState<Summary>();
   const [Transactions, setTransactions] = useState<Transaction[]>([]);
 
   const [open, setOpen] = useState(false);
@@ -119,10 +135,12 @@ const Transactions = () => {
 
   const loadTransactions = async (data: getTransactionsFilter) => {
     setTransactions([]);
+    setSummary(undefined);
     try {
       const loadedTags = await request(() => getTransactions(data));
       if (loadedTags && loadedTags.data) {
-        setTransactions(loadedTags.data);
+        setSummary(loadedTags.data.summary);
+        setTransactions(loadedTags.data.transactions);
         setTotalPages(loadedTags.totalPages);
       }
     } catch (e) {}
@@ -171,6 +189,23 @@ const Transactions = () => {
       </div>
 
       <TransactionsFilters emitFilters={(filter) => setFilters(filter)} />
+
+      <div className="flex flex-wrap justify-end gap-4">
+        {cards.map((card, i) => {
+          const value = summary && summary[card.prop as keyof Summary] ? summary[card.prop as keyof Summary] : 0;
+          const valueFuncClass = card.valueFunc ? card.valueFunc(value) : '';
+
+          return (
+            <div key={i} className="flex flex-col items-center gap-1">
+              <div className="flex justify-center items-center gap-2 text-xs">
+                <TrendingUp className={`w-4 h-4 ${valueFuncClass} ${card.valueClass}`} />
+                <span>{card.label}</span>
+              </div>
+              <span className={`font-bold ${valueFuncClass} ${card.valueClass}`}>{currencyFormat(value)}</span>
+            </div>
+          )
+        })}
+      </div>
 
       <DataTable columns={columns} data={Transactions} />
 
