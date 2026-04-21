@@ -57,7 +57,7 @@ const Login = () => {
             Insira os dados abaixo para registrar sua conta
           </CardDescription>
           <CardAction>
-            <Link to="/login">Login</Link>
+            <Link to="/login" className="p-1">Login</Link>
           </CardAction>
         </CardHeader>
         <CardContent>

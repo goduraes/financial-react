@@ -50,7 +50,7 @@ const Login = () => {
             Insira seu e-mail abaixo para acessar sua conta
           </CardDescription>
           <CardAction>
-            <Link to="/register">Sign Up</Link>
+            <Link to="/register" className="p-1">Sign Up</Link>
           </CardAction>
         </CardHeader>
         <CardContent>
