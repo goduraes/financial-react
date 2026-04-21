@@ -55,7 +55,7 @@ const Profile = () => {
             <Card size="sm" className="px-4">
                 <h2 className="text-lg font-semibold">Dados Pessoais</h2>
                 <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
+                    <div className="grid col-span-2 md:col-span-1 gap-2">
                         <Label htmlFor="name">Nome</Label>
                         <Input
                             id="name"
@@ -64,7 +64,7 @@ const Profile = () => {
                         />
                     </div>
                     
-                    <div className="grid gap-2">
+                    <div className="grid col-span-2 md:col-span-1 gap-2">
                         <Label htmlFor="email">Email</Label>
                         <Input
                             id="email"
