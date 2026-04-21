@@ -19,8 +19,7 @@ export function useApi<T = any>() {
       return response.data;
     } catch (err: any) {
       const message = err.response?.data?.error || 'Unexpected error';
-      if (err.response.status !== 401) setError(message);
-      if (toastError) appToast.error(message);
+      if (toastError && err.response.status !== 401) appToast.error(message);
       throw err;
     } finally {
       if (isLoadingScreen) setLoadingScreen(false);
