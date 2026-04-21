@@ -53,7 +53,7 @@ export function ComboboxMultiple({
       onValueChange={onChange}
     >
       <div className="relative w-full">
-        <ComboboxChips ref={anchor} className="w-full pr-10">
+        <ComboboxChips ref={anchor} className="w-full pr-10 text-base">
           <ComboboxValue>
             {(values) => (
               <>
@@ -64,7 +64,7 @@ export function ComboboxMultiple({
                       {map.get(v) ?? v}
                     </ComboboxChip>
                 )})}
-                {!values.length ? <ComboboxChipsInput placeholder={placeholder} /> : null}
+                {!values.length ? <ComboboxChipsInput className="text-base" placeholder={placeholder} /> : null}
               </>
             )}
           </ComboboxValue>
