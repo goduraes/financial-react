@@ -215,7 +215,7 @@ const ModalRegisterTransaction = ({
                       <SelectGroup>
                         {tags.map((tag) => (
                             <SelectItem key={tag.id} value={String(tag.id)}>                                
-                              <span className="flexinnline px-1.5 py-[1px] font-medium rounded-sm text-sm" style={{ background: `${tag.color}`, color: getContrastColor(tag.color) }}>
+                              <span className="flexinnline h-[calc(--spacing(5.5))] flex items-center justify-center px-1.5 font-medium rounded-sm text-base" style={{ background: `${tag.color}`, color: getContrastColor(tag.color) }}>
                                 {tag.name}
                               </span>
                             </SelectItem>

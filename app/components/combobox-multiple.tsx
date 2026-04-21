@@ -61,7 +61,7 @@ export function ComboboxMultiple({
                   const color = items.find((el) => el.value === v)?.color || '';
                   return (
                     <ComboboxChip className="text-base py-2" style={{ background: color, color: getContrastColor(color) }} key={v}>
-                      <span className="text-sm">{map.get(v) ?? v}</span>
+                      {map.get(v) ?? v}
                     </ComboboxChip>
                 )})}
                 {!values.length ? <ComboboxChipsInput placeholder={placeholder} /> : null}
@@ -79,7 +79,7 @@ export function ComboboxMultiple({
         <ComboboxList>
           {items.map((item) => (
             <ComboboxItem key={item.value} value={item.value}>
-              <span className="flexinnline px-1.5 py-[1px] font-medium rounded-sm text-sm" style={{ background: `${item.color}`, color: getContrastColor(item.color) }}>
+              <span className="flexinnline h-[calc(--spacing(5.5))] flex items-center justify-center px-1.5 font-medium rounded-sm text-base" style={{ background: `${item.color}`, color: getContrastColor(item.color) }}>
                 {item.label}
               </span>
             </ComboboxItem>
