@@ -116,7 +116,10 @@ const Login = () => {
                 <InputGroupInput
                   id="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
-                  {...register("confirmPassword", { validate: (value) => value === getValues("password") || "As senhas não coincidem" })}
+                  {...register("confirmPassword", {
+                    required: "Confirmação de senha é obrigatório",
+                    validate: (value) => value === getValues("password") || "As senhas não coincidem" 
+                  })}
                 />
                 <InputGroupAddon align="inline-end" className="cursor-pointer" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
                   {showConfirmPassword ? <EyeOffIcon /> : <Eye />}

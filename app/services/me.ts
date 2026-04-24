@@ -5,5 +5,9 @@ export const getMe = async () => {
 }
 
 export const editMe = (name: string, email: string) => {
-    return api.put("/me/edit", { name, email });
+    return api.patch("/me/edit", { name, email });
+}
+
+export const editPasswordMe = (currentPassword: string, newPassword: string) => {
+    return api.patch("/me/edit-password", { currentPassword, newPassword });
 }
