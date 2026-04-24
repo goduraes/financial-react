@@ -36,10 +36,7 @@ const Profile = () => {
     const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
 
     const personalDataForm = useForm<InputsPersonalData>();
-    const onSubmitPersonalData: SubmitHandler<InputsPersonalData> = (data) => handlePersonalData(data);
-    
     const passwordForm = useForm<InputsPasswordData>();
-    const onSubmitPasswordData: SubmitHandler<InputsPasswordData> = (data) => handlePasswordlData(data);
 
     const handlePersonalData = async (data: InputsPersonalData) => {
         try {
@@ -51,7 +48,10 @@ const Profile = () => {
     const handlePasswordlData = async (data: InputsPasswordData) => {
         try {
           const me = await request(() => editPasswordMe(data.currentPassword, data.newPassword), true, false);
-          if (me && me.data) appToast.success('Senha atualizada com sucesso!');
+          if (me && me.data) {
+            appToast.success('Senha atualizada com sucesso!');
+            passwordForm.reset();
+          }
         } catch (e) {}
     };
 
@@ -79,7 +79,7 @@ const Profile = () => {
             
             <Card size="sm" className="px-4">
                 <h2 className="text-lg font-semibold">Dados Pessoais</h2>
-                <form onSubmit={personalDataForm.handleSubmit(onSubmitPersonalData)} className="flex flex-col gap-4">
+                <form onSubmit={personalDataForm.handleSubmit(handlePersonalData)} className="flex flex-col gap-4">
                     <div className="grid md:grid-cols-2 gap-4">
                         <Field className="flex gap-2">
                             <Label htmlFor="name">Nome</Label>
